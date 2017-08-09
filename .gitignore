@@ -1,0 +1,16 @@
+# Unreal generated files
+
+*/Build
+*/Binaries
+*/DerivedDataCache
+*/Intermediate
+*/Saved
+**/StarterContent/
+
+# Visual Studio generated files
+
+*.VC.db
+
+# Xcode generated files
+
+*/DerivedData
