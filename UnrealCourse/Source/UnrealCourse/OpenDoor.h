@@ -34,5 +34,10 @@ private:
     UPROPERTY (EditAnywhere)
     ATriggerVolume* pressurePlate;
     
+    UPROPERTY (EditAnywhere)
+    float closeDelay = 1.0f;
+    
+    float lastOpenTime;
+    
     APawn* playerPawn;
 };

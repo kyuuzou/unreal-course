@@ -25,7 +25,7 @@ void UOpenDoor::BeginPlay()
 void UOpenDoor::Open () {
     AActor* owner = this->GetOwner ();
     
-    FRotator rotation = FRotator (0.0f, 90.0f, 0.0f);
+    FRotator rotation = FRotator (0.0f, this->openAngle, 0.0f);
     owner->SetActorRotation (rotation);
 }
 
@@ -45,10 +45,15 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
         return;
     }
     
-	if (this->pressurePlate->IsOverlappingActor (this->playerPawn)) {
-        this->Open ();
-    } else {
+    float currentTime = this->GetWorld ()->GetTimeSeconds();
+    
+    if (currentTime > this->lastOpenTime + this->closeDelay) {
         this->Close ();
+        
+        if (this->pressurePlate->IsOverlappingActor (this->playerPawn)) {
+            this->lastOpenTime = currentTime;
+            this->Open ();
+        }
     }
 }
 
