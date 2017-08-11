@@ -3,6 +3,7 @@
 #include "UnrealCourse.h"
 #include "PositionReporter.h"
 
+#include "GameFramework/Actor.h"
 
 // Sets default values for this component's properties
 UPositionReporter::UPositionReporter()
@@ -19,9 +20,13 @@ UPositionReporter::UPositionReporter()
 void UPositionReporter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
-	
+    
+    AActor* owner = this->GetOwner ();
+    FString name = owner->GetName ();
+    FVector position = owner->GetActorLocation ();
+    FString alternatePosition = owner->GetTransform ().GetLocation ().ToString ();
+    UE_LOG (LogTemp, Warning, TEXT ("%s is at (%f, %f, %f)"), *name, position.X, position.Y, position.Z);
+    UE_LOG (LogTemp, Warning, TEXT ("%s is at %s"), *name, *alternatePosition);
 }
 
 
