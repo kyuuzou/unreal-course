@@ -5,6 +5,7 @@
 #include "Components/ActorComponent.h"
 #include "OpenDoor.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE (FDoorEvent);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UNREALCOURSE_API UOpenDoor : public UActorComponent
@@ -12,7 +13,13 @@ class UNREALCOURSE_API UOpenDoor : public UActorComponent
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
+	UPROPERTY (BluePrintAssignable)
+    FDoorEvent onOpen;
+
+	UPROPERTY (BluePrintAssignable)
+    FDoorEvent onClose;
+ 
+    // Sets default values for this component's properties
 	UOpenDoor();
 
 	// Called every frame
@@ -25,9 +32,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-    void Close ();
     float GetTotalMassOnPlate ();
-    void Open ();
 
     UPROPERTY (VisibleAnywhere)
     float openAngle = 90.0f;
@@ -36,7 +41,5 @@ private:
     ATriggerVolume* pressurePlate;
     
     UPROPERTY (EditAnywhere)
-    float closeDelay = 1.0f;
-    
-    float lastOpenTime;
+    float triggerMass = 40.0f;
 };

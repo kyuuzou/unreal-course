@@ -34,20 +34,6 @@ float UOpenDoor::GetTotalMassOnPlate () {
     return totalMass;
 }
 
-void UOpenDoor::Open () {
-    AActor* owner = this->GetOwner ();
-    
-    FRotator rotation = FRotator (0.0f, this->openAngle, 0.0f);
-    owner->SetActorRotation (rotation);
-}
-
-void UOpenDoor::Close () {
-    AActor* owner = this->GetOwner ();
-    
-    FRotator rotation = FRotator (0.0f, 0.0f, 0.0f);
-    owner->SetActorRotation (rotation);
-}
-
 // Called every frame
 void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
@@ -57,15 +43,10 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
         return;
     }
     
-    float currentTime = this->GetWorld ()->GetTimeSeconds();
-    
-    if (this->GetTotalMassOnPlate () > 40.0f) {
-        this->Open ();
-        this->lastOpenTime = currentTime;
-    }
-    
-    if (currentTime > this->lastOpenTime + this->closeDelay) {
-        this->Close ();
+    if (this->GetTotalMassOnPlate () > this->triggerMass) {
+        this->onOpen.Broadcast ();
+    } else {
+        this->onClose.Broadcast ();
     }
 }
 
