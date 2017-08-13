@@ -24,9 +24,15 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
+    void Grab ();
+    void Release ();
+
     APlayerController* playerController;
 
     UPROPERTY (EditAnywhere)
     float reach = 100.0f;
 	
+    UPhysicsHandleComponent* physicsHandle = nullptr;
+    
+    UInputComponent* inputComponent = nullptr;
 };

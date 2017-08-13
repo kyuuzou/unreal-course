@@ -24,8 +24,29 @@ void UGrabber::BeginPlay()
 	UE_LOG (LogTemp, Warning, TEXT("Grabber reporting for duty!"));
     
     this->playerController = this->GetWorld()->GetFirstPlayerController();
+    
+    this->physicsHandle = this->GetOwner ()->FindComponentByClass<UPhysicsHandleComponent> ();
+    this->inputComponent = this->GetOwner ()->FindComponentByClass<UInputComponent> ();
+
+    if (this->physicsHandle == nullptr) {
+        UE_LOG (LogTemp, Error, TEXT ("PhysicsHandleComponent not found on %s"), *this->GetOwner()->GetName());
+    }
+    
+    if (this->inputComponent == nullptr) {
+        UE_LOG (LogTemp, Error, TEXT ("InputComponent not found on %s"), *this->GetOwner()->GetName());
+    } else {
+        this->inputComponent->BindAction ("Grab", IE_Pressed, this, &UGrabber::Grab);
+        this->inputComponent->BindAction ("Grab", IE_Released, this, &UGrabber::Release);
+    }
 }
 
+void UGrabber::Grab () {
+    UE_LOG(LogTemp, Display, TEXT ("Grab pressed!"));
+}
+
+void UGrabber::Release () {
+    UE_LOG(LogTemp, Display, TEXT ("Grab released!"));
+}
 
 // Called every frame
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
