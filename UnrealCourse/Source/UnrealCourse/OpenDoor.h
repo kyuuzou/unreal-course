@@ -26,6 +26,7 @@ protected:
 
 private:
     void Close ();
+    float GetTotalMassOnPlate ();
     void Open ();
 
     UPROPERTY (VisibleAnywhere)
@@ -38,6 +39,4 @@ private:
     float closeDelay = 1.0f;
     
     float lastOpenTime;
-    
-    APawn* playerPawn;
 };

@@ -52,22 +52,11 @@ FHitResult UGrabber::GetFirstPhysicsBodyInReach () {
     
     this->playerController->GetPlayerViewPoint (out location, out rotation);
     
-    //UE_LOG (LogTemp, Warning, TEXT("Location: %s, Rotation: %s"), *location.ToString(), *rotation.ToString());
-    
-    FVector lineTraceEnd = location + rotation.Vector() * this->reach;
+    FVector reachLineEnd = this->GetReachLineEnd ();
     
     UWorld* world = this->GetWorld();
     
-    DrawDebugLine (
-        world,
-        location,
-        lineTraceEnd,
-        FColor::Red,
-        false,
-        0.0f,
-        0.0f,
-        10.0f
-    );
+    DrawDebugLine (world, location, reachLineEnd, FColor::Red, false, 0.0f, 0.0f, 10.0f);
     
     FHitResult hit;
     
@@ -76,12 +65,21 @@ FHitResult UGrabber::GetFirstPhysicsBodyInReach () {
     world->LineTraceSingleByObjectType (
         out hit,
         location,
-        lineTraceEnd,
+        reachLineEnd,
         FCollisionObjectQueryParams (ECollisionChannel::ECC_PhysicsBody),
         traceParameters
     );
     
     return hit;
+}
+
+FVector UGrabber::GetReachLineEnd () {
+    FVector location;
+    FRotator rotation;
+    
+    this->playerController->GetPlayerViewPoint (out location, out rotation);
+    
+    return location + rotation.Vector() * this->reach;
 }
 
 void UGrabber::Grab () {
@@ -111,13 +109,8 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
     if (this->physicsHandle->GrabbedComponent != nullptr) {
-        FVector location;
-        FRotator rotation;
-        
-        this->playerController->GetPlayerViewPoint (out location, out rotation);
-        
-        FVector lineTraceEnd = location + rotation.Vector() * this->reach;
-        physicsHandle->SetTargetLocation (lineTraceEnd);
+        FVector reachLineEnd = this->GetReachLineEnd ();
+        physicsHandle->SetTargetLocation (reachLineEnd);
     }
 }
 

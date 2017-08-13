@@ -3,6 +3,7 @@
 #include "UnrealCourse.h"
 #include "OpenDoor.h"
 
+#define out
 
 // Sets default values for this component's properties
 UOpenDoor::UOpenDoor()
@@ -18,8 +19,19 @@ UOpenDoor::UOpenDoor()
 void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
+}
 
-    this->playerPawn = this->GetWorld()->GetFirstPlayerController()->GetPawn();
+float UOpenDoor::GetTotalMassOnPlate () {
+    float totalMass = 0.0f;
+    
+    TArray<AActor*> actors;
+    this->pressurePlate->GetOverlappingActors (out actors);
+    
+    for (AActor* actor : actors) {
+        totalMass += actor->FindComponentByClass<UPrimitiveComponent> ()->GetMass();
+    }
+    
+    return totalMass;
 }
 
 void UOpenDoor::Open () {
@@ -41,19 +53,19 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
     
-    if (this->pressurePlate == nullptr || this->playerPawn == nullptr) {
+    if (this->pressurePlate == nullptr) {
         return;
     }
     
     float currentTime = this->GetWorld ()->GetTimeSeconds();
     
+    if (this->GetTotalMassOnPlate () > 40.0f) {
+        this->Open ();
+        this->lastOpenTime = currentTime;
+    }
+    
     if (currentTime > this->lastOpenTime + this->closeDelay) {
         this->Close ();
-        
-        if (this->pressurePlate->IsOverlappingActor (this->playerPawn)) {
-            this->lastOpenTime = currentTime;
-            this->Open ();
-        }
     }
 }
 

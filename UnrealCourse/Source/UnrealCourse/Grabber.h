@@ -32,6 +32,7 @@ private:
     UInputComponent* inputComponent = nullptr;
     
     FHitResult GetFirstPhysicsBodyInReach ();
+    FVector GetReachLineEnd ();
     void InitializeInputComponent ();
     void InitializePhysicsHandleComponent ();
     void Grab ();
