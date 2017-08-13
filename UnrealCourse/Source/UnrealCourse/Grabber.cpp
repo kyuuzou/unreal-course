@@ -21,17 +21,15 @@ void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UE_LOG (LogTemp, Warning, TEXT("Grabber reporting for duty!"));
-    
     this->playerController = this->GetWorld()->GetFirstPlayerController();
     
-    this->physicsHandle = this->GetOwner ()->FindComponentByClass<UPhysicsHandleComponent> ();
     this->inputComponent = this->GetOwner ()->FindComponentByClass<UInputComponent> ();
 
-    if (this->physicsHandle == nullptr) {
-        UE_LOG (LogTemp, Error, TEXT ("PhysicsHandleComponent not found on %s"), *this->GetOwner()->GetName());
-    }
-    
+    this->InitializePhysicsHandleComponent ();
+    this->InitializeInputComponent ();
+}
+
+void UGrabber::InitializeInputComponent () {
     if (this->inputComponent == nullptr) {
         UE_LOG (LogTemp, Error, TEXT ("InputComponent not found on %s"), *this->GetOwner()->GetName());
     } else {
@@ -40,19 +38,15 @@ void UGrabber::BeginPlay()
     }
 }
 
-void UGrabber::Grab () {
-    UE_LOG(LogTemp, Display, TEXT ("Grab pressed!"));
+void UGrabber::InitializePhysicsHandleComponent () {
+    this->physicsHandle = this->GetOwner ()->FindComponentByClass<UPhysicsHandleComponent> ();
+    
+    if (this->physicsHandle == nullptr) {
+        UE_LOG (LogTemp, Error, TEXT ("PhysicsHandleComponent not found on %s"), *this->GetOwner()->GetName());
+    }
 }
 
-void UGrabber::Release () {
-    UE_LOG(LogTemp, Display, TEXT ("Grab released!"));
-}
-
-// Called every frame
-void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+FHitResult UGrabber::GetFirstPhysicsBodyInReach () {
     FVector location;
     FRotator rotation;
     
@@ -79,7 +73,7 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
     
     FCollisionQueryParams traceParameters = FCollisionQueryParams (FName (TEXT ("")), false, this->GetOwner ());
 
-    bool hitSomething = world->LineTraceSingleByObjectType (
+    world->LineTraceSingleByObjectType (
         out hit,
         location,
         lineTraceEnd,
@@ -87,8 +81,43 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
         traceParameters
     );
     
-    if (hitSomething) {
-        UE_LOG (LogTemp, Display, TEXT ("Hit: %s"), *hit.Actor->GetName());
+    return hit;
+}
+
+void UGrabber::Grab () {
+    FHitResult hitResult = this->GetFirstPhysicsBodyInReach ();
+    AActor* actorHit = hitResult.GetActor ();
+    
+    if (actorHit == nullptr) {
+        return;
+    }
+
+    this->physicsHandle->GrabComponentAtLocation (
+        hitResult.GetComponent (),
+        NAME_None,
+        actorHit->GetActorLocation ()
+    );
+}
+
+void UGrabber::Release () {
+    if (this->physicsHandle->GrabbedComponent != nullptr) {
+        this->physicsHandle->ReleaseComponent ();
+    }
+}
+
+// Called every frame
+void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+    if (this->physicsHandle->GrabbedComponent != nullptr) {
+        FVector location;
+        FRotator rotation;
+        
+        this->playerController->GetPlayerViewPoint (out location, out rotation);
+        
+        FVector lineTraceEnd = location + rotation.Vector() * this->reach;
+        physicsHandle->SetTargetLocation (lineTraceEnd);
     }
 }
 

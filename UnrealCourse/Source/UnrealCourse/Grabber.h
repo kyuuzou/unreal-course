@@ -10,7 +10,7 @@ UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UNREALCOURSE_API UGrabber : public UActorComponent
 {
 	GENERATED_BODY()
-
+	
 public:	
 	// Sets default values for this component's properties
 	UGrabber();
@@ -24,15 +24,17 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
-    void Grab ();
-    void Release ();
-
-    APlayerController* playerController;
-
     UPROPERTY (EditAnywhere)
     float reach = 100.0f;
 	
+    APlayerController* playerController;
     UPhysicsHandleComponent* physicsHandle = nullptr;
-    
     UInputComponent* inputComponent = nullptr;
+    
+    FHitResult GetFirstPhysicsBodyInReach ();
+    void InitializeInputComponent ();
+    void InitializePhysicsHandleComponent ();
+    void Grab ();
+    void Release ();
+    
 };
